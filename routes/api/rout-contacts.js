@@ -7,21 +7,25 @@ const {
   getContact,
   createContact,
   updateContact,
+  updateStatusContact,
   deleteContact,
 } = require('../../controllers');
 
 const {
-  validateAddContact,
+  validateCreateContact,
   validateUpdateContact,
+  validateUpdateStatusContact,
 } = require('../../middleware');
 
 router.get('/', getContacts);
 
 router.get('/:id', getContact);
 
-router.post('/', validateAddContact, createContact);
+router.post('/', validateCreateContact, createContact);
 
 router.put('/:id', validateUpdateContact, updateContact);
+
+router.patch('/:id/favorite', validateUpdateStatusContact, updateStatusContact);
 
 router.delete('/:id', deleteContact);
 

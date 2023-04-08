@@ -1,67 +1,79 @@
-const fs = require('fs/promises');
-const path = require('path');
-const { nanoid } = require('nanoid');
+const { Schema, model } = require('mongoose');
+const Joi = require('joi');
 
-const contactsPath = path.resolve('models', 'contacts.json');
+const { handleMongooseError } = require('../middleware/handleMongooseError');
 
-const getContactsService = async () => {
-  const data = await fs.readFile(contactsPath, 'utf-8');
-  return JSON.parse(data);
-};
+const phoneRegExp = /\(\d{3}\)\s\d{3}-\d{4}/;
 
-const getContactService = async (id) => {
-  const contacts = await getContactsService();
-  const contact = contacts.find((item) => item.id === id);
-  return contact || null;
-};
+const contactSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Set name for contact'],
+    },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+    },
+    phone: {
+      type: String,
+      required: [true, 'Phone is reqired, use tamplate (111) 11-1111'],
+      match: phoneRegExp,
+    },
+    favorite: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { versionKey: false }
+);
+contactSchema.post('save', handleMongooseError);
 
-const createContactService = async ({ name, email, phone }) => {
-  const contacts = await getContactsService();
+const schemaCreateContact = Joi.object({
+  name: Joi.string().required().messages({
+    'string.empty': `"name" cannot be an empty field`,
+    'string.base': `"name" should be a type of 'text'`,
+  }),
+  email: Joi.string().email({ minDomainSegments: 2 }).required().messages({
+    'string.empty': `"email" cannot be empty`,
+    'string.base': `"email" must be string`,
+  }),
+  phone: Joi.string().pattern(phoneRegExp).required().messages({
+    'string.empty': `"phone" cannot be empty`,
+    'string.base': `"phone" must be string`,
+    'string.pattern.base':
+      "Invalid phone's format, enter you phone like this (111) 111-1111",
+  }),
+  favorite: Joi.boolean(),
+});
 
-  const isPhoneExist = contacts.some((item) => item.phone === phone);
-  if (isPhoneExist) {
-    return null;
-  }
-  const newContact = {
-    id: nanoid(),
-    name,
-    email,
-    phone,
-  };
-  contacts.push(newContact);
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  return newContact;
-};
+const schemaUpdateContact = Joi.object({
+  name: Joi.string().messages({
+    'string.empty': `"name" cannot be an empty field`,
+    'string.base': `"name" should be a type of 'text'`,
+  }),
+  email: Joi.string().email({ minDomainSegments: 2 }).messages({
+    'string.empty': `"email" cannot be empty`,
+    'string.base': `"email" must be string`,
+  }),
+  phone: Joi.string().pattern(phoneRegExp).messages({
+    'string.empty': `"phone" cannot be empty`,
+    'string.base': `"phone" must be string`,
+    'string.pattern.base':
+      "Invalid phone's format, enter you phone like this (111) 111-1111",
+  }),
+  favorite: Joi.boolean(),
+});
 
-const updateContactService = async (id, body) => {
-  const contacts = await getContactsService();
+const schemaUpdateStatusContact = Joi.object({
+  favorite: Joi.boolean().required(),
+});
 
-  const index = contacts.findIndex((item) => item.id === id);
-  if (index === -1) {
-    return null;
-  }
-
-  contacts[index] = { ...contacts[index], ...body };
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  return contacts[index];
-};
-
-const deleteContactService = async (id) => {
-  const contacts = await getContactsService();
-  const index = contacts.findIndex((item) => item.id === id);
-  if (index === -1) {
-    return null;
-  }
-  const [result] = contacts.splice(index, 1);
-
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  return result;
-};
+const Contact = model('contact', contactSchema);
 
 module.exports = {
-  getContactsService,
-  getContactService,
-  createContactService,
-  updateContactService,
-  deleteContactService,
+  Contact,
+  schemaCreateContact,
+  schemaUpdateContact,
+  schemaUpdateStatusContact,
 };

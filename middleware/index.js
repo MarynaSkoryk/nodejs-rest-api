@@ -1,4 +1,11 @@
-const { validateAddContact } = require('./validateAddContact');
+const { validateCreateContact } = require('./validateCreateContact');
 const { validateUpdateContact } = require('./validateUpdateContact');
+const {
+  validateUpdateStatusContact,
+} = require('./validateUpdateStatusContact');
 
-module.exports = { validateAddContact, validateUpdateContact };
+module.exports = {
+  validateCreateContact,
+  validateUpdateContact,
+  validateUpdateStatusContact,
+};
