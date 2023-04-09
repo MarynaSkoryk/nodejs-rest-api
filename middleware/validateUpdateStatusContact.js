@@ -1,4 +1,4 @@
-const { HttpError } = require('../helpers');
+const { HttpError } = require('../helpers/HttpError');
 const { schemaUpdateStatusContact } = require('../models/contact');
 
 const validateUpdateStatusContact = (req, res, next) => {
