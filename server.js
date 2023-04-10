@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 
 const app = require('./app');
 
-const DB_CONTACTS =
-  'mongodb+srv://Maryna:EVU7Lq4DYyUQdtN9@cluster0.iluanvl.mongodb.net/test';
+const { DB_CONTACTS } = process.env;
 
 mongoose
   .connect(DB_CONTACTS)
@@ -15,5 +14,3 @@ mongoose
     console.log(error.message);
     process.exit(1);
   });
-
-// T9InJcxIFkAPGvCH
