@@ -25,11 +25,14 @@ const contactSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+      require: true,
+    },
   },
   { versionKey: false }
 );
-// не працює, в запиті все одно status 500
-// contactSchema.post("save", handleMongooseError);
 
 const schemaCreateContact = Joi.object({
   name: Joi.string().required().messages({
