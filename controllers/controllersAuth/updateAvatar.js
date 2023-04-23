@@ -4,8 +4,6 @@ const path = require('path');
 const { User } = require('../../models/user');
 const { resizeImg } = require('../../utils/resizeImg');
 
-// const { HttpError } = require("../../helpers");
-
 const avatarsDir = path.join(__dirname, '../../', 'public', 'avatars');
 
 const updateAvatar = async (req, res, next) => {
